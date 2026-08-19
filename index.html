@@ -3,595 +3,921 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC P2P Voice Chat</title>
+    <title>Group Voice Call</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         body {
-            background: linear-gradient(145deg, #0b1a2e, #1a2f44);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e1a;
+            color: #e0e8f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            padding: 1.5rem;
+            padding: 20px;
         }
-        .card {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 3.5rem;
-            padding: 2.5rem 2.8rem;
-            max-width: 720px;
+        .app-container {
             width: 100%;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.04);
-            transition: all 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-        h1 {
-            font-weight: 400;
-            font-size: 2.2rem;
-            letter-spacing: -0.5px;
-            color: #d6e6ff;
-            text-align: center;
-            margin-bottom: 0.2rem;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        h1 small {
-            font-size: 1rem;
-            font-weight: 300;
-            background: rgba(70, 130, 200, 0.3);
-            padding: 0.2rem 1rem;
-            border-radius: 40px;
-            color: #b0d0ff;
-            letter-spacing: 0.3px;
+            max-width: 900px;
+            background: #141b2b;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .sub {
-            text-align: center;
-            color: #8aa9d9;
-            margin-bottom: 2.5rem;
-            font-weight: 300;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-            border-bottom: 1px dashed rgba(255,255,255,0.06);
-            padding-bottom: 1.2rem;
-        }
-        .status-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 60px;
-            padding: 0.65rem 1.6rem;
-            margin: 0 auto 1.8rem auto;
-            width: fit-content;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(4px);
-        }
-        .led {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: inline-block;
-            background: #4a6f8f;
-            box-shadow: 0 0 8px #1f3b4f;
-            transition: 0.25s;
-        }
-        .led.active {
-            background: #3ddc84;
-            box-shadow: 0 0 16px #3ddc84aa;
-        }
-        .led.muted {
-            background: #f5a623;
-            box-shadow: 0 0 12px #f5a623aa;
-        }
-        #statusText {
-            color: #c6dbf5;
-            font-weight: 400;
-            font-size: 1rem;
-        }
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            justify-content: center;
-            margin: 2rem 0 1.5rem;
-        }
-        .btn {
-            background: rgba(30, 50, 80, 0.6);
-            border: none;
-            border-radius: 60px;
-            padding: 0.9rem 1.8rem;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #e0eeff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            cursor: pointer;
-            transition: 0.18s;
-            flex: 1 0 auto;
-            min-width: 130px;
-            letter-spacing: 0.3px;
-        }
-        .btn:hover:not(:disabled) {
-            background: rgba(60, 100, 160, 0.6);
-            transform: scale(1.02);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
-        }
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: none;
-            filter: grayscale(0.5);
-        }
-        .btn.primary {
-            background: #2b6c9e;
-            border-color: #5c9eff;
-            color: white;
-            font-weight: 600;
-        }
-        .btn.primary:hover:not(:disabled) {
-            background: #3a7fb8;
-        }
-        .btn.danger {
-            background: #a04040;
-            border-color: #d47070;
-        }
-        .btn.danger:hover:not(:disabled) {
-            background: #c05050;
-        }
-        .btn.success {
-            background: #2d7a4b;
-            border-color: #5fcb8a;
-        }
-        .btn.success:hover:not(:disabled) {
-            background: #3b9660;
-        }
-        .sdp-area {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 2rem;
-            padding: 1.2rem 1.2rem 0.8rem;
-            margin: 1.5rem 0 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        .sdp-label {
-            color: #94b4df;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            opacity: 0.7;
-            margin-bottom: 8px;
+        .header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        textarea {
-            width: 100%;
-            background: rgba(10, 20, 35, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.2rem;
-            padding: 0.9rem 1.2rem;
-            color: #d0e2ff;
-            font-size: 0.85rem;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            resize: vertical;
-            min-height: 80px;
-            outline: none;
-            transition: 0.15s;
-            backdrop-filter: blur(2px);
+        .logo {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6c8cff, #3ddc84);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        textarea:focus {
-            border-color: #4a8fd0;
-            box-shadow: 0 0 0 3px rgba(70, 130, 200, 0.2);
-        }
-        .actions-sdp {
+        .user-info {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
             gap: 12px;
-            justify-content: flex-end;
-            margin-top: 12px;
         }
-        .btn.small {
-            padding: 0.4rem 1.2rem;
-            font-size: 0.8rem;
-            flex: 0 1 auto;
-            background: rgba(30, 50, 80, 0.5);
-        }
-        .btn.small:hover {
-            background: rgba(60, 100, 160, 0.6);
-        }
-        .mute-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4a6f8f;
-            margin-right: 6px;
-        }
-        .footer {
-            margin-top: 2rem;
-            text-align: center;
-            color: #4f749b;
-            font-size: 0.75rem;
-            opacity: 0.6;
-            letter-spacing: 0.3px;
-            border-top: 1px solid rgba(255,255,255,0.03);
-            padding-top: 1.5rem;
-        }
-        .flex-row {
+        .user-badge {
+            background: #2a3a5a;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.online { background: #3ddc84; }
+        .status-dot.offline { background: #666; }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        .call-section {
+            background: #0f1625;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .call-status {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .call-status .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .call-status .status-text {
+            font-size: 18px;
+            color: #8899bb;
+        }
+        .call-status .status-text.active {
+            color: #3ddc84;
+        }
+        
+        .call-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
             flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1a2744;
+            color: #b0c4e8;
+        }
+        .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        
+        .btn-call { background: #2b6c9e; color: white; }
+        .btn-call.active { background: #dc3545; }
+        .btn-mute { background: #2a3a5a; }
+        .btn-mute.muted { background: #f5a623; color: #000; }
+        .btn-leave { background: #5a2a2a; color: #ff8888; }
+        
+        .members-section {
+            background: #0f1625;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .members-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .members-header h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #667799;
+        }
+        .members-count {
+            background: #1a2744;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .member-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s;
+        }
+        .member-item:hover { background: rgba(255,255,255,0.05); }
+        .member-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a4a7a, #4a2a7a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .member-status {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: #1a2744;
+        }
+        .member-status.speaking { background: #3ddc84; color: #000; }
+        .member-status.muted { background: #f5a623; color: #000; }
+        
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: #141b2b;
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .login-box h2 {
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+        .login-box p {
+            color: #8899bb;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #0a0e1a;
+            color: #e0e8f0;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: #6c8cff;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6c8cff, #3ddc84);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .login-btn:hover { transform: scale(1.02); }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a2744;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 999;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="card" role="main">
-        <h1>
-            🎙️ P2P Voice
-            <small>WebRTC</small>
-        </h1>
-        <div class="sub">🔗 direct browser-to-browser · no server</div>
 
-        <div class="status-badge">
-            <span class="led" id="connectionLed"></span>
-            <span id="statusText">⚡ Disconnected</span>
-        </div>
-
-        <div class="controls">
-            <button class="btn primary" id="startCallBtn">📞 Start Call</button>
-            <button class="btn danger" id="hangupBtn" disabled>⏹️ Hang up</button>
-            <button class="btn success" id="muteBtn" disabled>🔊 Mute</button>
-        </div>
-
-        <!-- SDP exchange panel -->
-        <div class="sdp-area">
-            <div class="sdp-label">
-                <span>📋 SDP offer / answer</span>
-                <span style="font-weight:300; opacity:0.6;">copy & paste to peer</span>
-            </div>
-            <textarea id="sdpTextarea" placeholder="Paste remote SDP here, or copy your local SDP…" spellcheck="false"></textarea>
-            <div class="actions-sdp">
-                <button class="btn small" id="copySdpBtn">📄 Copy local SDP</button>
-                <button class="btn small primary" id="applyRemoteSdpBtn">📥 Apply remote SDP</button>
-            </div>
-        </div>
-
-        <div class="footer">
-            <span id="peerInfo">🔒 peer: none</span>
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+        <h2>🎤 Group Voice Call</h2>
+        <p>Enter your name to join the call</p>
+        <input type="text" id="loginName" class="login-input" placeholder="Your name..." maxlength="20">
+        <button class="login-btn" onclick="login()">Join Call</button>
+        <div style="margin-top:12px;font-size:12px;color:#667799;text-align:center;">
+            Everyone in the room can hear each other
         </div>
     </div>
+</div>
 
-    <script>
-        (function() {
-            "use strict";
+<div class="app-container" style="display:none;" id="appContainer">
+    <div class="header">
+        <div class="logo">🎙️ GroupCall</div>
+        <div class="user-info">
+            <span class="user-badge">
+                <span class="status-dot online"></span>
+                <span id="currentUserName">You</span>
+            </span>
+            <button class="btn" style="padding:6px 14px;font-size:12px;background:#2a2a3a;" onclick="logout()">✕</button>
+        </div>
+    </div>
+    
+    <div class="main-grid">
+        <div class="call-section">
+            <div class="call-status">
+                <span class="icon" id="callIcon">📞</span>
+                <div class="status-text" id="callStatusText">Ready to call</div>
+            </div>
+            <div class="call-controls">
+                <button class="btn btn-call" id="callBtn" onclick="toggleCall()">📞 Start Call</button>
+                <button class="btn btn-mute" id="muteBtn" onclick="toggleMute()" disabled>🔊 Mute</button>
+                <button class="btn btn-leave" onclick="leaveCall()" disabled>🚪 Leave</button>
+            </div>
+            <div style="margin-top:16px;padding:12px;background:#0a0e1a;border-radius:12px;font-size:13px;color:#667799;text-align:center;">
+                <span id="participantCount">0</span> participants in call
+            </div>
+        </div>
+        
+        <div class="members-section">
+            <div class="members-header">
+                <h3>👥 Members</h3>
+                <span class="members-count" id="memberCount">0</span>
+            </div>
+            <div class="member-list" id="memberList">
+                <div style="text-align:center;color:#667799;padding:20px;font-size:13px;">
+                    No members yet
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            // ----- DOM refs -----
-            const statusText = document.getElementById('statusText');
-            const connectionLed = document.getElementById('connectionLed');
-            const startCallBtn = document.getElementById('startCallBtn');
-            const hangupBtn = document.getElementById('hangupBtn');
-            const muteBtn = document.getElementById('muteBtn');
-            const sdpTextarea = document.getElementById('sdpTextarea');
-            const copySdpBtn = document.getElementById('copySdpBtn');
-            const applyRemoteSdpBtn = document.getElementById('applyRemoteSdpBtn');
-            const peerInfo = document.getElementById('peerInfo');
+<script>
+// ============================================================
+// 🔥 SIMPLE GROUP CALL USING PEER-TO-PEER MESH NETWORK
+// Each user connects to every other user directly
+// Uses a simple "signaling" via BroadcastChannel (local) 
+// For real deployment, replace with WebSocket server
+// ============================================================
 
-            // ----- WebRTC state -----
-            let localStream = null;
-            let remoteStream = null;
-            let peerConnection = null;
-            let isCallActive = false;
-            let isMuted = false;
+const STATE = {
+    currentUser: null,
+    isInCall: false,
+    isMuted: false,
+    peers: new Map(), // peerId -> { connection, stream, name }
+    localStream: null,
+    audioElements: new Map(),
+    // Simulated "room" - in production, use a signaling server
+    roomId: 'group-call-room',
+    members: [], // { id, name, status }
+    peerConnections: new Map(),
+};
 
-            // STUN servers (public)
-            const rtcConfig = {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
-                ]
-            };
+// ============================================================
+// 🎯 LOGIN SYSTEM
+// ============================================================
 
-            // ----- Helper: update UI -----
-            function updateUI() {
-                const active = isCallActive;
-                startCallBtn.disabled = active;
-                hangupBtn.disabled = !active;
-                muteBtn.disabled = !active;
-                connectionLed.className = 'led' + (active ? ' active' : '');
-                statusText.innerText = active ? (isMuted ? '🔇 Muted' : '🎙️ Connected') : '⚡ Disconnected';
-                if (active && isMuted) {
-                    connectionLed.className = 'led muted';
+function login() {
+    const nameInput = document.getElementById('loginName');
+    const name = nameInput.value.trim() || 'Guest_' + Math.floor(Math.random() * 1000);
+    
+    STATE.currentUser = {
+        id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        name: name
+    };
+    
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('currentUserName').textContent = name;
+    
+    // Initialize the call system
+    initCallSystem();
+    
+    // Add self to members
+    addMember(STATE.currentUser.id, STATE.currentUser.name, 'online');
+    
+    showToast(`👋 Welcome ${name}!`);
+}
+
+function logout() {
+    leaveCall();
+    STATE.currentUser = null;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+}
+
+// ============================================================
+// 📡 SIGNALING SYSTEM (Simulated with BroadcastChannel)
+// In production: Replace with WebSocket server
+// ============================================================
+
+let channel = null;
+
+function initSignaling() {
+    if (channel) return;
+    try {
+        // BroadcastChannel works across tabs on same browser
+        // For real deployment, use WebSocket: new WebSocket('wss://your-server.com')
+        channel = new BroadcastChannel('group-call-signal');
+        channel.onmessage = (event) => {
+            handleSignal(event.data);
+        };
+        console.log('📡 Signaling initialized');
+    } catch (e) {
+        console.warn('BroadcastChannel not supported, using localStorage fallback');
+        // Fallback: use localStorage with polling
+        initLocalStorageSignaling();
+    }
+}
+
+// Fallback signaling via localStorage (works across tabs)
+function initLocalStorageSignaling() {
+    const KEY = 'group-call-signal';
+    let lastProcessed = 0;
+    
+    setInterval(() => {
+        const data = localStorage.getItem(KEY);
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.timestamp > lastProcessed) {
+                    lastProcessed = parsed.timestamp;
+                    handleSignal(parsed.data);
                 }
-                peerInfo.innerText = active ? '🔗 peer: connected' : '🔒 peer: none';
-                // update mute button text
-                muteBtn.innerHTML = isMuted ? '🔇 Unmute' : '🔊 Mute';
+            } catch(e) {}
+        }
+    }, 500);
+    
+    // Override sendSignal
+    window.sendSignal = (data) => {
+        const payload = {
+            timestamp: Date.now(),
+            data: data
+        };
+        localStorage.setItem(KEY, JSON.stringify(payload));
+    };
+}
+
+function sendSignal(data) {
+    if (channel) {
+        channel.postMessage(data);
+    } else {
+        // Use localStorage fallback
+        const KEY = 'group-call-signal';
+        const payload = {
+            timestamp: Date.now(),
+            data: data
+        };
+        localStorage.setItem(KEY, JSON.stringify(payload));
+    }
+}
+
+// ============================================================
+//# 🔗 WEBRTC GROUP CALL ENGINE
+// ============================================================
+
+const rtcConfig = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+function initCallSystem() {
+    initSignaling();
+    
+    // Broadcast our presence
+    broadcastPresence();
+    
+    // Listen for new members
+    setInterval(() => {
+        // Simulate member heartbeat
+        broadcastPresence();
+    }, 10000);
+}
+
+function broadcastPresence() {
+    if (!STATE.currentUser) return;
+    sendSignal({
+        type: 'presence',
+        userId: STATE.currentUser.id,
+        name: STATE.currentUser.name,
+        inCall: STATE.isInCall
+    });
+}
+
+function handleSignal(data) {
+    console.log('📨 Signal:', data.type, data);
+    
+    switch(data.type) {
+        case 'presence':
+            handlePresence(data);
+            break;
+        case 'offer':
+            handleOffer(data);
+            break;
+        case 'answer':
+            handleAnswer(data);
+            break;
+        case 'ice-candidate':
+            handleIceCandidate(data);
+            break;
+        case 'user-left':
+            handleUserLeft(data);
+            break;
+        case 'call-state':
+            handleCallState(data);
+            break;
+    }
+}
+
+// ============================================================
+//# 👥 MEMBER MANAGEMENT
+// ============================================================
+
+function handlePresence(data) {
+    if (data.userId === STATE.currentUser.id) return;
+    
+    const existing = STATE.members.find(m => m.id === data.userId);
+    if (!existing) {
+        addMember(data.userId, data.name, data.inCall ? 'online' : 'away');
+        // If we're in a call and they're in call, connect to them
+        if (STATE.isInCall && data.inCall) {
+            connectToPeer(data.userId);
+        }
+    } else {
+        // Update status
+        const status = data.inCall ? 'online' : 'away';
+        updateMemberStatus(data.userId, status);
+        // If they joined the call and we're in call, connect
+        if (STATE.isInCall && data.inCall && !STATE.peerConnections.has(data.userId)) {
+            connectToPeer(data.userId);
+        }
+    }
+}
+
+function addMember(id, name, status = 'online') {
+    STATE.members.push({ id, name, status });
+    renderMembers();
+    
+    // Also add to peer map if not exists
+    if (!STATE.peers.has(id)) {
+        STATE.peers.set(id, { name, stream: null, connected: false });
+    }
+}
+
+function updateMemberStatus(id, status) {
+    const member = STATE.members.find(m => m.id === id);
+    if (member) {
+        member.status = status;
+        renderMembers();
+    }
+}
+
+function removeMember(id) {
+    STATE.members = STATE.members.filter(m => m.id !== id);
+    STATE.peers.delete(id);
+    STATE.peerConnections.delete(id);
+    renderMembers();
+    updateParticipantCount();
+}
+
+function renderMembers() {
+    const list = document.getElementById('memberList');
+    const count = document.getElementById('memberCount');
+    count.textContent = STATE.members.length;
+    
+    if (STATE.members.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:#667799;padding:20px;font-size:13px;">No members yet</div>';
+        return;
+    }
+    
+    list.innerHTML = STATE.members.map(m => `
+        <div class="member-item">
+            <div class="member-name">
+                <div class="member-avatar">${m.name.charAt(0).toUpperCase()}</div>
+                <span>${m.name}</span>
+                ${m.id === STATE.currentUser?.id ? ' <span style="font-size:10px;color:#667799;">(you)</span>' : ''}
+            </div>
+            <span class="member-status ${m.status}">${m.status}</span>
+        </div>
+    `).join('');
+}
+
+function updateParticipantCount() {
+    const count = STATE.peerConnections.size;
+    document.getElementById('participantCount').textContent = count + 1; // +1 for self
+}
+
+// ============================================================
+//# 📞 CALL CONTROLS
+// ============================================================
+
+async function toggleCall() {
+    if (!STATE.isInCall) {
+        await startCall();
+    } else {
+        leaveCall();
+    }
+}
+
+async function startCall() {
+    try {
+        // Get microphone
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: { echoCancellation: true, noiseSuppression: true }
+        });
+        STATE.localStream = stream;
+        
+        // Connect to all existing members
+        const existingMembers = STATE.members.filter(m => m.id !== STATE.currentUser.id);
+        for (const member of existingMembers) {
+            await connectToPeer(member.id);
+        }
+        
+        STATE.isInCall = true;
+        updateCallUI();
+        broadcastCallState(true);
+        showToast('📞 Call started!');
+        
+        // Update UI
+        document.getElementById('callBtn').textContent = '⏹️ End Call';
+        document.getElementById('callBtn').classList.add('active');
+        document.getElementById('muteBtn').disabled = false;
+        document.getElementById('callIcon').textContent = '🔊';
+        document.getElementById('callStatusText').textContent = '🔴 Live';
+        document.getElementById('callStatusText').classList.add('active');
+        
+    } catch (err) {
+        console.error('❌ Failed to start call:', err);
+        showToast('❌ Cannot access microphone. Please allow microphone access.');
+    }
+}
+
+function leaveCall() {
+    // Close all peer connections
+    for (const [id, pc] of STATE.peerConnections) {
+        pc.close();
+    }
+    STATE.peerConnections.clear();
+    
+    // Stop local stream
+    if (STATE.localStream) {
+        STATE.localStream.getTracks().forEach(t => t.stop());
+        STATE.localStream = null;
+    }
+    
+    // Remove all remote audio elements
+    for (const [id, audio] of STATE.audioElements) {
+        audio.remove();
+    }
+    STATE.audioElements.clear();
+    
+    STATE.isInCall = false;
+    STATE.isMuted = false;
+    broadcastCallState(false);
+    updateCallUI();
+    updateParticipantCount();
+    
+    document.getElementById('callBtn').textContent = '📞 Start Call';
+    document.getElementById('callBtn').classList.remove('active');
+    document.getElementById('muteBtn').disabled = true;
+    document.getElementById('muteBtn').textContent = '🔊 Mute';
+    document.getElementById('muteBtn').classList.remove('muted');
+    document.getElementById('callIcon').textContent = '📞';
+    document.getElementById('callStatusText').textContent = 'Ready to call';
+    document.getElementById('callStatusText').classList.remove('active');
+    
+    showToast('Call ended');
+}
+
+function toggleMute() {
+    if (!STATE.localStream) return;
+    STATE.isMuted = !STATE.isMuted;
+    STATE.localStream.getAudioTracks().forEach(t => {
+        t.enabled = !STATE.isMuted;
+    });
+    
+    const btn = document.getElementById('muteBtn');
+    btn.textContent = STATE.isMuted ? '🔇 Muted' : '🔊 Mute';
+    btn.classList.toggle('muted', STATE.isMuted);
+}
+
+function updateCallUI() {
+    const callBtn = document.getElementById('callBtn');
+    const leaveBtn = document.querySelector('.btn-leave');
+    callBtn.textContent = STATE.isInCall ? '⏹️ End Call' : '📞 Start Call';
+    callBtn.classList.toggle('active', STATE.isInCall);
+    leaveBtn.disabled = !STATE.isInCall;
+    document.getElementById('muteBtn').disabled = !STATE.isInCall;
+}
+
+function broadcastCallState(inCall) {
+    sendSignal({
+        type: 'call-state',
+        userId: STATE.currentUser.id,
+        inCall: inCall
+    });
+}
+
+function handleCallState(data) {
+    if (data.userId === STATE.currentUser.id) return;
+    updateMemberStatus(data.userId, data.inCall ? 'online' : 'away');
+    
+    if (data.inCall && STATE.isInCall) {
+        connectToPeer(data.userId);
+    } else if (!data.inCall) {
+        // Peer left call
+        if (STATE.peerConnections.has(data.userId)) {
+            STATE.peerConnections.get(data.userId).close();
+            STATE.peerConnections.delete(data.userId);
+            updateParticipantCount();
+            // Remove audio element
+            if (STATE.audioElements.has(data.userId)) {
+                STATE.audioElements.get(data.userId).remove();
+                STATE.audioElements.delete(data.userId);
             }
+        }
+    }
+}
 
-            // ----- close peer connection & cleanup -----
-            function closeConnection() {
-                if (peerConnection) {
-                    peerConnection.close();
-                    peerConnection = null;
-                }
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                    localStream = null;
-                }
-                if (remoteStream) {
-                    remoteStream.getTracks().forEach(track => track.stop());
-                    remoteStream = null;
-                }
-                isCallActive = false;
-                isMuted = false;
-                updateUI();
-                // clear SDP area (optional)
-                sdpTextarea.value = '';
-                // remove event listeners? we recreate peerConnection each time.
-            }
+// ============================================================
+//# 🔗 PEER-TO-PEER CONNECTION
+// ============================================================
 
-            // ----- create peer connection with handlers -----
-            function createPeerConnection() {
-                const pc = new RTCPeerConnection(rtcConfig);
+async function connectToPeer(peerId) {
+    if (peerId === STATE.currentUser.id) return;
+    if (STATE.peerConnections.has(peerId)) return;
+    if (!STATE.localStream) return;
+    
+    console.log('🔗 Connecting to peer:', peerId);
+    
+    const pc = new RTCPeerConnection(rtcConfig);
+    STATE.peerConnections.set(peerId, pc);
+    
+    // Add local stream
+    STATE.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, STATE.localStream);
+    });
+    
+    // Handle incoming stream
+    pc.ontrack = (event) => {
+        if (event.streams && event.streams[0]) {
+            const stream = event.streams[0];
+            const audioEl = document.createElement('audio');
+            audioEl.autoplay = true;
+            audioEl.srcObject = stream;
+            audioEl.style.display = 'none';
+            document.body.appendChild(audioEl);
+            STATE.audioElements.set(peerId, audioEl);
+            
+            // Find member name for debugging
+            const member = STATE.members.find(m => m.id === peerId);
+            console.log(`🔊 Audio from ${member?.name || peerId}`);
+        }
+    };
+    
+    // ICE candidates
+    pc.onicecandidate = (event) => {
+        if (event.candidate) {
+            sendSignal({
+                type: 'ice-candidate',
+                from: STATE.currentUser.id,
+                to: peerId,
+                candidate: event.candidate
+            });
+        }
+    };
+    
+    // Connection state
+    pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'connected') {
+            console.log('✅ Connected to peer:', peerId);
+            updateParticipantCount();
+        } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+            console.log('❌ Disconnected from peer:', peerId);
+            STATE.peerConnections.delete(peerId);
+            updateParticipantCount();
+        }
+    };
+    
+    // Create offer
+    try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        sendSignal({
+            type: 'offer',
+            from: STATE.currentUser.id,
+            to: peerId,
+            sdp: pc.localDescription
+        });
+    } catch (err) {
+        console.error('Offer error:', err);
+    }
+}
 
-                // when ICE candidates are gathered, put them into SDP textarea
-                pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        // we collect all candidates, but we prefer to update after gathering complete.
-                        // but we can also update progressively.
-                        // we update the textarea with the current SDP (including candidates)
-                        const sdp = pc.localDescription?.sdp;
-                        if (sdp) {
-                            sdpTextarea.value = sdp;
-                        }
-                    } else {
-                        // ice gathering complete
-                        const sdp = pc.localDescription?.sdp;
-                        if (sdp) {
-                            sdpTextarea.value = sdp;
-                        }
-                    }
-                };
+// ============================================================
+//# 📨 SIGNAL HANDLERS
+// ============================================================
 
-                // when remote stream arrives
-                pc.ontrack = (event) => {
-                    if (event.streams && event.streams.length > 0) {
-                        remoteStream = event.streams[0];
-                        // attach to audio element (we can play it)
-                        const audioEl = document.getElementById('remoteAudio');
-                        if (!audioEl) {
-                            const newAudio = document.createElement('audio');
-                            newAudio.id = 'remoteAudio';
-                            newAudio.autoplay = true;
-                            newAudio.style.display = 'none';
-                            document.body.appendChild(newAudio);
-                            newAudio.srcObject = remoteStream;
-                        } else {
-                            audioEl.srcObject = remoteStream;
-                            audioEl.autoplay = true;
-                        }
-                        console.log('✅ Remote stream attached');
-                    }
-                };
+async function handleOffer(data) {
+    if (data.to !== STATE.currentUser.id) return;
+    if (STATE.peerConnections.has(data.from)) return;
+    if (!STATE.localStream) {
+        // Auto-start call if not started
+        await startCall();
+        // Then retry
+        setTimeout(() => handleOffer(data), 500);
+        return;
+    }
+    
+    const pc = new RTCPeerConnection(rtcConfig);
+    STATE.peerConnections.set(data.from, pc);
+    
+    // Add local stream
+    STATE.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, STATE.localStream);
+    });
+    
+    pc.ontrack = (event) => {
+        if (event.streams && event.streams[0]) {
+            const stream = event.streams[0];
+            const audioEl = document.createElement('audio');
+            audioEl.autoplay = true;
+            audioEl.srcObject = stream;
+            audioEl.style.display = 'none';
+            document.body.appendChild(audioEl);
+            STATE.audioElements.set(data.from, audioEl);
+        }
+    };
+    
+    pc.onicecandidate = (event) => {
+        if (event.candidate) {
+            sendSignal({
+                type: 'ice-candidate',
+                from: STATE.currentUser.id,
+                to: data.from,
+                candidate: event.candidate
+            });
+        }
+    };
+    
+    try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        sendSignal({
+            type: 'answer',
+            from: STATE.currentUser.id,
+            to: data.from,
+            sdp: pc.localDescription
+        });
+    } catch (err) {
+        console.error('Answer error:', err);
+    }
+}
 
-                // connection state change
-                pc.onconnectionstatechange = () => {
-                    const state = pc.connectionState;
-                    console.log('Connection state:', state);
-                    if (state === 'connected') {
-                        isCallActive = true;
-                        updateUI();
-                    } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-                        // if disconnected, cleanup
-                        if (isCallActive) {
-                            closeConnection();
-                        }
-                    }
-                };
+async function handleAnswer(data) {
+    if (data.to !== STATE.currentUser.id) return;
+    const pc = STATE.peerConnections.get(data.from);
+    if (!pc) return;
+    
+    try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        console.log('✅ Answer set for:', data.from);
+    } catch (err) {
+        console.error('Set answer error:', err);
+    }
+}
 
-                pc.oniceconnectionstatechange = () => {
-                    const state = pc.iceConnectionState;
-                    if (state === 'connected' || state === 'completed') {
-                        // ensure active
-                        if (!isCallActive) {
-                            isCallActive = true;
-                            updateUI();
-                        }
-                    }
-                };
+async function handleIceCandidate(data) {
+    if (data.to !== STATE.currentUser.id) return;
+    const pc = STATE.peerConnections.get(data.from);
+    if (!pc) return;
+    
+    try {
+        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    } catch (err) {
+        console.error('ICE candidate error:', err);
+    }
+}
 
-                return pc;
-            }
+function handleUserLeft(data) {
+    if (data.userId === STATE.currentUser.id) return;
+    removeMember(data.userId);
+    if (STATE.peerConnections.has(data.userId)) {
+        STATE.peerConnections.get(data.userId).close();
+        STATE.peerConnections.delete(data.userId);
+        updateParticipantCount();
+    }
+    if (STATE.audioElements.has(data.userId)) {
+        STATE.audioElements.get(data.userId).remove();
+        STATE.audioElements.delete(data.userId);
+    }
+}
 
-            // ----- get local audio stream -----
-            async function getLocalAudio() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    return stream;
-                } catch (err) {
-                    console.error('❌ getUserMedia error:', err);
-                    alert('Could not access microphone. Please allow microphone access and try again.');
-                    return null;
-                }
-            }
+// ============================================================
+//# 🛠️ UTILITY FUNCTIONS
+// ============================================================
 
-            // ----- start call (initiator) -----
-            async function startCall() {
-                if (isCallActive) {
-                    console.warn('Call already active');
-                    return;
-                }
+function showToast(message) {
+    let toast = document.querySelector('.toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
 
-                // get local stream
-                const stream = await getLocalAudio();
-                if (!stream) return;
-                localStream = stream;
+// ============================================================
+//# 🚀 INIT
+// ============================================================
 
-                // create peer connection
-                const pc = createPeerConnection();
-                peerConnection = pc;
+// Auto-login for demo (remove for production)
+// setTimeout(() => {
+//     if (STATE.currentUser) return;
+//     document.getElementById('loginName').value = 'User_' + Math.floor(Math.random() * 100);
+// }, 500);
 
-                // add local tracks
-                localStream.getTracks().forEach(track => {
-                    pc.addTrack(track, localStream);
-                });
-
-                // create offer
-                try {
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    // after setLocalDescription, ice candidates will be gathered and onicecandidate will update textarea
-                    sdpTextarea.value = pc.localDescription.sdp;
-                    // set state: waiting for answer
-                    isCallActive = false; // not yet connected
-                    updateUI();
-                    statusText.innerText = '📤 Waiting for answer…';
-                } catch (err) {
-                    console.error('Create offer error:', err);
-                    closeConnection();
-                }
-            }
-
-            // ----- apply remote SDP (answer or offer) -----
-            async function applyRemoteSdp() {
-                if (!peerConnection) {
-                    // if no peer connection, create one (as callee) but we need local stream first
-                    // if we are not initiator, we need to get local stream and create peer connection.
-                    if (!localStream) {
-                        const stream = await getLocalAudio();
-                        if (!stream) return;
-                        localStream = stream;
-                    }
-                    const pc = createPeerConnection();
-                    peerConnection = pc;
-                    // add tracks
-                    localStream.getTracks().forEach(track => {
-                        pc.addTrack(track, localStream);
-                    });
-                }
-
-                const sdpText = sdpTextarea.value.trim();
-                if (!sdpText) {
-                    alert('Please paste the remote SDP (offer or answer) into the textarea.');
-                    return;
-                }
-
-                try {
-                    // determine type: if remote SDP contains 'a=setup:active' or 'a=setup:passive'? we can check.
-                    // simpler: if we have local description, we are initiator -> we expect answer.
-                    // else we expect offer.
-                    const isInitiator = !!peerConnection.localDescription;
-                    const sdpType = isInitiator ? 'answer' : 'offer';
-                    const remoteDesc = new RTCSessionDescription({
-                        type: sdpType,
-                        sdp: sdpText
-                    });
-
-                    await peerConnection.setRemoteDescription(remoteDesc);
-                    console.log(`✅ Remote ${sdpType} set`);
-
-                    if (!isInitiator) {
-                        // if we are callee, we need to create answer
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-                        sdpTextarea.value = peerConnection.localDescription.sdp;
-                        statusText.innerText = '📤 SDP answer ready, send to peer';
-                        // we are not connected yet, but waiting for ICE
-                    } else {
-                        // initiator: remote answer set, ICE will connect
-                        statusText.innerText = '⏳ Connecting…';
-                    }
-                    // update UI but connection not active until ICE connects
-                    updateUI();
-                } catch (err) {
-                    console.error('Error applying remote SDP:', err);
-                    alert('Failed to apply remote SDP. Check if it is a valid offer/answer.');
-                }
-            }
-
-            // ----- mute / unmute -----
-            function toggleMute() {
-                if (!isCallActive || !localStream) return;
-                isMuted = !isMuted;
-                localStream.getAudioTracks().forEach(track => {
-                    track.enabled = !isMuted;
-                });
-                updateUI();
-            }
-
-            // ----- hangup -----
-            function hangup() {
-                closeConnection();
-                // reset SDP area
-                sdpTextarea.value = '';
-                // also remove audio element
-                const audioEl = document.getElementById('remoteAudio');
-                if (audioEl) audioEl.remove();
-                statusText.innerText = '⚡ Disconnected';
-                updateUI();
-            }
-
-            // ----- copy SDP to clipboard -----
-            function copySdp() {
-                const sdp = sdpTextarea.value;
-                if (!sdp) {
-                    alert('No SDP to copy. Start a call or generate offer first.');
-                    return;
-                }
-                navigator.clipboard.writeText(sdp).then(() => {
-                    alert('SDP copied to clipboard!');
-                }).catch(() => {
-                    // fallback
-                    sdpTextarea.select();
-                    document.execCommand('copy');
-                    alert('SDP copied!');
-                });
-            }
-
-            // ----- init event listeners -----
-            function init() {
-                startCallBtn.addEventListener('click', startCall);
-                hangupBtn.addEventListener('click', hangup);
-                muteBtn.addEventListener('click', toggleMute);
-                copySdpBtn.addEventListener('click', copySdp);
-                applyRemoteSdpBtn.addEventListener('click', applyRemoteSdp);
-
-                // initial UI
-                updateUI();
-                // add a hidden audio element for remote stream if not exists
-                if (!document.getElementById('remoteAudio')) {
-                    const audio = document.createElement('audio');
-                    audio.id = 'remoteAudio';
-                    audio.autoplay = true;
-                    audio.style.display = 'none';
-                    document.body.appendChild(audio);
-                }
-
-                // Cleanup on page unload
-                window.addEventListener('beforeunload', () => {
-                    closeConnection();
-                });
-            }
-
-            // start
-            init();
-        })();
-    </script>
+console.log('🎤 Group Voice Call App loaded!');
+console.log('📝 Enter a name and click "Join Call" to start');
+</script>
 </body>
 </html>
