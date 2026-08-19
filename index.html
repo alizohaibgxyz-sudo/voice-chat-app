@@ -11,23 +11,22 @@
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: #0a0e1a;
             color: #e0e8f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
-        .app-container {
+        .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
             background: #141b2b;
-            border-radius: 24px;
+            border-radius: 20px;
             padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
         }
         .header {
             display: flex;
@@ -38,19 +37,14 @@
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .logo {
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
             background: linear-gradient(135deg, #6c8cff, #3ddc84);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
         .user-badge {
-            background: #2a3a5a;
+            background: #1a2744;
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 14px;
@@ -58,59 +52,46 @@
             align-items: center;
             gap: 8px;
         }
-        .status-dot {
+        .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
-        .status-dot.online { background: #3ddc84; }
-        .status-dot.offline { background: #666; }
+        .dot.online { background: #3ddc84; }
+        .dot.offline { background: #666; }
         
-        .main-grid {
+        .grid {
             display: grid;
-            grid-template-columns: 1fr 280px;
-            gap: 20px;
+            grid-template-columns: 1fr 240px;
+            gap: 16px;
         }
-        @media (max-width: 700px) {
-            .main-grid { grid-template-columns: 1fr; }
+        @media (max-width: 640px) {
+            .grid { grid-template-columns: 1fr; }
         }
         
-        .call-section {
+        .call-panel {
             background: #0f1625;
             border-radius: 16px;
             padding: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .call-status {
             text-align: center;
-            padding: 30px 0;
         }
-        .call-status .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            display: block;
-        }
-        .call-status .status-text {
-            font-size: 18px;
-            color: #8899bb;
-        }
-        .call-status .status-text.active {
-            color: #3ddc84;
-        }
+        .call-icon { font-size: 56px; margin-bottom: 12px; display: block; }
+        .call-status { font-size: 18px; color: #8899bb; }
+        .call-status.active { color: #3ddc84; }
         
-        .call-controls {
+        .controls {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 16px;
         }
         .btn {
-            padding: 12px 28px;
+            padding: 10px 24px;
             border: none;
             border-radius: 50px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -120,84 +101,70 @@
             background: #1a2744;
             color: #b0c4e8;
         }
-        .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        
-        .btn-call { background: #2b6c9e; color: white; }
-        .btn-call.active { background: #dc3545; }
+        .btn:hover { transform: scale(1.03); filter: brightness(1.15); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        .btn-primary { background: #2b6c9e; color: white; }
+        .btn-danger { background: #8a2a2a; color: #ff8888; }
         .btn-mute { background: #2a3a5a; }
         .btn-mute.muted { background: #f5a623; color: #000; }
-        .btn-leave { background: #5a2a2a; color: #ff8888; }
         
-        .members-section {
+        .members-panel {
             background: #0f1625;
             border-radius: 16px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 16px;
         }
-        .members-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .members-header h3 {
-            font-size: 14px;
+        .members-panel h3 {
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #667799;
-        }
-        .members-count {
-            background: #1a2744;
-            padding: 2px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
         }
         .member-list {
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
         }
-        .member-item {
+        .member {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 12px;
+            padding: 6px 10px;
             margin-bottom: 4px;
-            border-radius: 8px;
+            border-radius: 6px;
             background: rgba(255,255,255,0.02);
-            transition: background 0.2s;
+            font-size: 14px;
         }
-        .member-item:hover { background: rgba(255,255,255,0.05); }
-        .member-name {
+        .member .name {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        .member-avatar {
-            width: 32px;
-            height: 32px;
+        .member .avatar {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2a4a7a, #4a2a7a);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .member-status {
             font-size: 12px;
+            font-weight: 600;
+        }
+        .member .status {
+            font-size: 10px;
             padding: 2px 10px;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #1a2744;
         }
-        .member-status.speaking { background: #3ddc84; color: #000; }
-        .member-status.muted { background: #f5a623; color: #000; }
+        .member .status.in-call { background: #3ddc84; color: #000; }
         
         .login-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
@@ -208,44 +175,33 @@
             background: #141b2b;
             padding: 40px;
             border-radius: 24px;
-            max-width: 400px;
+            max-width: 360px;
             width: 100%;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .login-box h2 {
-            margin-bottom: 8px;
-            font-size: 24px;
-        }
-        .login-box p {
-            color: #8899bb;
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
+        .login-box h2 { margin-bottom: 8px; }
+        .login-box p { color: #8899bb; margin-bottom: 20px; font-size: 14px; }
         .login-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
             background: #0a0e1a;
             color: #e0e8f0;
             font-size: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
-        .login-input:focus {
-            outline: none;
-            border-color: #6c8cff;
-        }
+        .login-input:focus { outline: none; border-color: #6c8cff; }
         .login-btn {
             width: 100%;
             padding: 14px;
             border: none;
             border-radius: 12px;
             background: linear-gradient(135deg, #6c8cff, #3ddc84);
-            color: #fff;
+            color: white;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
         }
         .login-btn:hover { transform: scale(1.02); }
         
@@ -255,68 +211,86 @@
             left: 50%;
             transform: translateX(-50%);
             background: #1a2744;
-            padding: 12px 24px;
+            padding: 10px 24px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
             z-index: 999;
+            font-size: 14px;
             animation: slideUp 0.3s ease;
         }
         @keyframes slideUp {
             from { transform: translateX(-50%) translateY(100px); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
+        
+        .debug {
+            font-size: 11px;
+            color: #445566;
+            margin-top: 12px;
+            padding: 8px;
+            background: #0a0e1a;
+            border-radius: 8px;
+            text-align: left;
+            font-family: monospace;
+            max-height: 60px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h2>🎤 Group Voice Call</h2>
-        <p>Enter your name to join the call</p>
-        <input type="text" id="loginName" class="login-input" placeholder="Your name..." maxlength="20">
-        <button class="login-btn" onclick="login()">Join Call</button>
+        <h2>🎙️ Group Call</h2>
+        <p>Enter your name to join the room</p>
+        <input type="text" id="loginName" class="login-input" placeholder="Your name..." maxlength="20" autofocus>
+        <button class="login-btn" onclick="login()">Join Room</button>
         <div style="margin-top:12px;font-size:12px;color:#667799;text-align:center;">
             Everyone in the room can hear each other
         </div>
     </div>
 </div>
 
-<div class="app-container" style="display:none;" id="appContainer">
-    <div class="header">
-        <div class="logo">🎙️ GroupCall</div>
-        <div class="user-info">
-            <span class="user-badge">
-                <span class="status-dot online"></span>
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎙️ GroupCall</div>
+            <div class="user-badge">
+                <span class="dot online"></span>
                 <span id="currentUserName">You</span>
-            </span>
-            <button class="btn" style="padding:6px 14px;font-size:12px;background:#2a2a3a;" onclick="logout()">✕</button>
-        </div>
-    </div>
-    
-    <div class="main-grid">
-        <div class="call-section">
-            <div class="call-status">
-                <span class="icon" id="callIcon">📞</span>
-                <div class="status-text" id="callStatusText">Ready to call</div>
-            </div>
-            <div class="call-controls">
-                <button class="btn btn-call" id="callBtn" onclick="toggleCall()">📞 Start Call</button>
-                <button class="btn btn-mute" id="muteBtn" onclick="toggleMute()" disabled>🔊 Mute</button>
-                <button class="btn btn-leave" onclick="leaveCall()" disabled>🚪 Leave</button>
-            </div>
-            <div style="margin-top:16px;padding:12px;background:#0a0e1a;border-radius:12px;font-size:13px;color:#667799;text-align:center;">
-                <span id="participantCount">0</span> participants in call
+                <button onclick="logout()" style="background:none;border:none;color:#667799;cursor:pointer;margin-left:8px;">✕</button>
             </div>
         </div>
         
-        <div class="members-section">
-            <div class="members-header">
-                <h3>👥 Members</h3>
-                <span class="members-count" id="memberCount">0</span>
+        <div class="grid">
+            <div class="call-panel">
+                <span class="call-icon" id="callIcon">📞</span>
+                <div class="call-status" id="callStatus">Ready</div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="callBtn" onclick="toggleCall()">📞 Start Call</button>
+                    <button class="btn btn-mute" id="muteBtn" onclick="toggleMute()" disabled>🔊 Mute</button>
+                    <button class="btn btn-danger" id="leaveBtn" onclick="leaveCall()" disabled>Leave</button>
+                </div>
+                
+                <div style="margin-top:12px;font-size:13px;color:#667799;">
+                    👥 <span id="participantCount">0</span> in call
+                </div>
+                
+                <div class="debug" id="debugLog">⚡ Ready</div>
             </div>
-            <div class="member-list" id="memberList">
-                <div style="text-align:center;color:#667799;padding:20px;font-size:13px;">
-                    No members yet
+            
+            <div class="members-panel">
+                <h3>
+                    👥 Members
+                    <span id="memberCount">0</span>
+                </h3>
+                <div class="member-list" id="memberList">
+                    <div style="text-align:center;color:#667799;padding:20px;font-size:13px;">
+                        No members yet
+                    </div>
                 </div>
             </div>
         </div>
@@ -325,160 +299,120 @@
 
 <script>
 // ============================================================
-// 🔥 SIMPLE GROUP CALL USING PEER-TO-PEER MESH NETWORK
-// Each user connects to every other user directly
-// Uses a simple "signaling" via BroadcastChannel (local) 
-// For real deployment, replace with WebSocket server
+// 🎯 SIMPLE GROUP CALL WITH WEBSOCKET-LIKE BEHAVIOR
+// Using BroadcastChannel + localStorage for signaling
 // ============================================================
 
-const STATE = {
-    currentUser: null,
-    isInCall: false,
-    isMuted: false,
-    peers: new Map(), // peerId -> { connection, stream, name }
+// ----- STATE -----
+const state = {
+    user: null,
+    inCall: false,
+    muted: false,
     localStream: null,
-    audioElements: new Map(),
-    // Simulated "room" - in production, use a signaling server
-    roomId: 'group-call-room',
-    members: [], // { id, name, status }
-    peerConnections: new Map(),
+    peers: new Map(), // userId -> { pc, stream, name }
+    members: [], // { id, name, inCall }
+    channel: null,
+    debug: (msg) => {
+        const el = document.getElementById('debugLog');
+        if (el) el.textContent = msg;
+        console.log('🔵', msg);
+    }
 };
 
-// ============================================================
-// 🎯 LOGIN SYSTEM
-// ============================================================
-
+// ----- LOGIN -----
 function login() {
     const nameInput = document.getElementById('loginName');
-    const name = nameInput.value.trim() || 'Guest_' + Math.floor(Math.random() * 1000);
+    const name = nameInput.value.trim() || 'User_' + Math.floor(Math.random() * 1000);
     
-    STATE.currentUser = {
-        id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    state.user = {
+        id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         name: name
     };
     
     document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('app').style.display = 'block';
     document.getElementById('currentUserName').textContent = name;
     
-    // Initialize the call system
-    initCallSystem();
+    state.debug('👋 Welcome ' + name);
     
-    // Add self to members
-    addMember(STATE.currentUser.id, STATE.currentUser.name, 'online');
+    initSignaling();
+    sendPresence();
     
-    showToast(`👋 Welcome ${name}!`);
+    // Auto-join call after short delay
+    setTimeout(() => {
+        if (!state.inCall) {
+            startCall();
+        }
+    }, 1000);
 }
 
 function logout() {
     leaveCall();
-    STATE.currentUser = null;
+    state.user = null;
     document.getElementById('loginOverlay').style.display = 'flex';
-    document.getElementById('appContainer').style.display = 'none';
-}
-
-// ============================================================
-// 📡 SIGNALING SYSTEM (Simulated with BroadcastChannel)
-// In production: Replace with WebSocket server
-// ============================================================
-
-let channel = null;
-
-function initSignaling() {
-    if (channel) return;
-    try {
-        // BroadcastChannel works across tabs on same browser
-        // For real deployment, use WebSocket: new WebSocket('wss://your-server.com')
-        channel = new BroadcastChannel('group-call-signal');
-        channel.onmessage = (event) => {
-            handleSignal(event.data);
-        };
-        console.log('📡 Signaling initialized');
-    } catch (e) {
-        console.warn('BroadcastChannel not supported, using localStorage fallback');
-        // Fallback: use localStorage with polling
-        initLocalStorageSignaling();
+    document.getElementById('app').style.display = 'none';
+    if (state.channel) {
+        state.channel.close();
+        state.channel = null;
     }
 }
 
-// Fallback signaling via localStorage (works across tabs)
-function initLocalStorageSignaling() {
-    const KEY = 'group-call-signal';
-    let lastProcessed = 0;
-    
-    setInterval(() => {
-        const data = localStorage.getItem(KEY);
-        if (data) {
-            try {
-                const parsed = JSON.parse(data);
-                if (parsed.timestamp > lastProcessed) {
-                    lastProcessed = parsed.timestamp;
-                    handleSignal(parsed.data);
-                }
-            } catch(e) {}
-        }
-    }, 500);
-    
-    // Override sendSignal
-    window.sendSignal = (data) => {
-        const payload = {
-            timestamp: Date.now(),
-            data: data
+// ----- SIGNALING (BroadcastChannel + localStorage) -----
+function initSignaling() {
+    try {
+        state.channel = new BroadcastChannel('group-call');
+        state.channel.onmessage = (e) => handleSignal(e.data);
+        state.debug('📡 Signaling via BroadcastChannel');
+    } catch(e) {
+        state.debug('⚠️ Using localStorage fallback');
+        // localStorage polling fallback
+        let lastTime = 0;
+        setInterval(() => {
+            const data = localStorage.getItem('group-call-signal');
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.time > lastTime) {
+                        lastTime = parsed.time;
+                        handleSignal(parsed.data);
+                    }
+                } catch(e) {}
+            }
+        }, 300);
+        window._sendSignal = (data) => {
+            localStorage.setItem('group-call-signal', JSON.stringify({
+                time: Date.now(),
+                data: data
+            }));
         };
-        localStorage.setItem(KEY, JSON.stringify(payload));
-    };
+    }
 }
 
 function sendSignal(data) {
-    if (channel) {
-        channel.postMessage(data);
-    } else {
-        // Use localStorage fallback
-        const KEY = 'group-call-signal';
-        const payload = {
-            timestamp: Date.now(),
-            data: data
-        };
-        localStorage.setItem(KEY, JSON.stringify(payload));
+    if (state.channel) {
+        state.channel.postMessage(data);
+    } else if (window._sendSignal) {
+        window._sendSignal(data);
     }
 }
 
-// ============================================================
-//# 🔗 WEBRTC GROUP CALL ENGINE
-// ============================================================
-
-const rtcConfig = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-    ]
-};
-
-function initCallSystem() {
-    initSignaling();
-    
-    // Broadcast our presence
-    broadcastPresence();
-    
-    // Listen for new members
-    setInterval(() => {
-        // Simulate member heartbeat
-        broadcastPresence();
-    }, 10000);
-}
-
-function broadcastPresence() {
-    if (!STATE.currentUser) return;
+// ----- PRESENCE -----
+function sendPresence() {
+    if (!state.user) return;
     sendSignal({
         type: 'presence',
-        userId: STATE.currentUser.id,
-        name: STATE.currentUser.name,
-        inCall: STATE.isInCall
+        userId: state.user.id,
+        name: state.user.name,
+        inCall: state.inCall
     });
 }
 
+// ----- HANDLE SIGNALS -----
 function handleSignal(data) {
-    console.log('📨 Signal:', data.type, data);
+    if (!state.user) return;
+    if (data.userId === state.user.id) return;
+    
+    state.debug('📨 ' + data.type + ' from ' + (data.name || data.userId));
     
     switch(data.type) {
         case 'presence':
@@ -490,11 +424,11 @@ function handleSignal(data) {
         case 'answer':
             handleAnswer(data);
             break;
-        case 'ice-candidate':
-            handleIceCandidate(data);
+        case 'ice':
+            handleIce(data);
             break;
-        case 'user-left':
-            handleUserLeft(data);
+        case 'leave':
+            handleLeave(data);
             break;
         case 'call-state':
             handleCallState(data);
@@ -502,249 +436,239 @@ function handleSignal(data) {
     }
 }
 
-// ============================================================
-//# 👥 MEMBER MANAGEMENT
-// ============================================================
-
+// ----- PRESENCE HANDLER -----
 function handlePresence(data) {
-    if (data.userId === STATE.currentUser.id) return;
-    
-    const existing = STATE.members.find(m => m.id === data.userId);
+    // Add or update member
+    const existing = state.members.find(m => m.id === data.userId);
     if (!existing) {
-        addMember(data.userId, data.name, data.inCall ? 'online' : 'away');
-        // If we're in a call and they're in call, connect to them
-        if (STATE.isInCall && data.inCall) {
+        state.members.push({
+            id: data.userId,
+            name: data.name || 'Unknown',
+            inCall: data.inCall || false
+        });
+        renderMembers();
+        state.debug(`👤 ${data.name} joined`);
+        
+        // If we're in call and they're in call, connect
+        if (state.inCall && data.inCall) {
             connectToPeer(data.userId);
         }
     } else {
-        // Update status
-        const status = data.inCall ? 'online' : 'away';
-        updateMemberStatus(data.userId, status);
-        // If they joined the call and we're in call, connect
-        if (STATE.isInCall && data.inCall && !STATE.peerConnections.has(data.userId)) {
+        const wasInCall = existing.inCall;
+        existing.inCall = data.inCall || false;
+        renderMembers();
+        
+        // If they joined call and we're in call, connect
+        if (state.inCall && data.inCall && !state.peers.has(data.userId)) {
             connectToPeer(data.userId);
+        }
+        // If they left call, disconnect
+        if (!data.inCall && state.peers.has(data.userId)) {
+            disconnectPeer(data.userId);
         }
     }
 }
 
-function addMember(id, name, status = 'online') {
-    STATE.members.push({ id, name, status });
-    renderMembers();
-    
-    // Also add to peer map if not exists
-    if (!STATE.peers.has(id)) {
-        STATE.peers.set(id, { name, stream: null, connected: false });
-    }
-}
-
-function updateMemberStatus(id, status) {
-    const member = STATE.members.find(m => m.id === id);
+function handleCallState(data) {
+    const member = state.members.find(m => m.id === data.userId);
     if (member) {
-        member.status = status;
+        member.inCall = data.inCall;
         renderMembers();
     }
 }
 
-function removeMember(id) {
-    STATE.members = STATE.members.filter(m => m.id !== id);
-    STATE.peers.delete(id);
-    STATE.peerConnections.delete(id);
-    renderMembers();
-    updateParticipantCount();
+function handleLeave(data) {
+    const member = state.members.find(m => m.id === data.userId);
+    if (member) {
+        state.debug(`👋 ${member.name} left`);
+        state.members = state.members.filter(m => m.id !== data.userId);
+        renderMembers();
+        disconnectPeer(data.userId);
+    }
 }
 
+// ----- RENDER MEMBERS -----
 function renderMembers() {
     const list = document.getElementById('memberList');
     const count = document.getElementById('memberCount');
-    count.textContent = STATE.members.length;
+    count.textContent = state.members.length;
     
-    if (STATE.members.length === 0) {
-        list.innerHTML = '<div style="text-align:center;color:#667799;padding:20px;font-size:13px;">No members yet</div>';
+    if (state.members.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:#667799;padding:20px;font-size:13px;">No members</div>';
         return;
     }
     
-    list.innerHTML = STATE.members.map(m => `
-        <div class="member-item">
-            <div class="member-name">
-                <div class="member-avatar">${m.name.charAt(0).toUpperCase()}</div>
-                <span>${m.name}</span>
-                ${m.id === STATE.currentUser?.id ? ' <span style="font-size:10px;color:#667799;">(you)</span>' : ''}
+    list.innerHTML = state.members.map(m => `
+        <div class="member">
+            <div class="name">
+                <div class="avatar">${m.name.charAt(0).toUpperCase()}</div>
+                ${m.name}
+                ${m.id === state.user?.id ? ' (you)' : ''}
             </div>
-            <span class="member-status ${m.status}">${m.status}</span>
+            <span class="status ${m.inCall ? 'in-call' : ''}">${m.inCall ? '🎙️' : 'away'}</span>
         </div>
     `).join('');
+    
+    updateParticipantCount();
 }
 
 function updateParticipantCount() {
-    const count = STATE.peerConnections.size;
-    document.getElementById('participantCount').textContent = count + 1; // +1 for self
+    const inCall = state.members.filter(m => m.inCall).length;
+    document.getElementById('participantCount').textContent = inCall;
 }
 
-// ============================================================
-//# 📞 CALL CONTROLS
-// ============================================================
-
+// ----- CALL CONTROLS -----
 async function toggleCall() {
-    if (!STATE.isInCall) {
-        await startCall();
-    } else {
+    if (state.inCall) {
         leaveCall();
+    } else {
+        await startCall();
     }
 }
 
 async function startCall() {
     try {
-        // Get microphone
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: { echoCancellation: true, noiseSuppression: true }
+        state.debug('🎤 Getting microphone...');
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
-        STATE.localStream = stream;
+        state.localStream = stream;
         
-        // Connect to all existing members
-        const existingMembers = STATE.members.filter(m => m.id !== STATE.currentUser.id);
-        for (const member of existingMembers) {
-            await connectToPeer(member.id);
-        }
-        
-        STATE.isInCall = true;
-        updateCallUI();
-        broadcastCallState(true);
-        showToast('📞 Call started!');
+        state.inCall = true;
+        state.muted = false;
         
         // Update UI
         document.getElementById('callBtn').textContent = '⏹️ End Call';
-        document.getElementById('callBtn').classList.add('active');
+        document.getElementById('callBtn').classList.add('btn-danger');
         document.getElementById('muteBtn').disabled = false;
+        document.getElementById('leaveBtn').disabled = false;
         document.getElementById('callIcon').textContent = '🔊';
-        document.getElementById('callStatusText').textContent = '🔴 Live';
-        document.getElementById('callStatusText').classList.add('active');
+        document.getElementById('callStatus').textContent = '🔴 Live';
+        document.getElementById('callStatus').classList.add('active');
         
-    } catch (err) {
-        console.error('❌ Failed to start call:', err);
-        showToast('❌ Cannot access microphone. Please allow microphone access.');
+        // Connect to existing members who are in call
+        for (const member of state.members) {
+            if (member.id !== state.user.id && member.inCall) {
+                await connectToPeer(member.id);
+            }
+        }
+        
+        // Broadcast presence
+        sendPresence();
+        sendSignal({
+            type: 'call-state',
+            userId: state.user.id,
+            inCall: true
+        });
+        
+        state.debug('✅ Call started!');
+        showToast('📞 Call started!');
+        
+    } catch(err) {
+        state.debug('❌ Mic error: ' + err.message);
+        showToast('❌ Cannot access microphone');
+        console.error(err);
     }
 }
 
 function leaveCall() {
-    // Close all peer connections
-    for (const [id, pc] of STATE.peerConnections) {
-        pc.close();
+    state.debug('⏹️ Leaving call...');
+    
+    // Disconnect all peers
+    for (const [id, peer] of state.peers) {
+        try {
+            peer.pc.close();
+            if (peer.audio) peer.audio.remove();
+        } catch(e) {}
     }
-    STATE.peerConnections.clear();
+    state.peers.clear();
     
     // Stop local stream
-    if (STATE.localStream) {
-        STATE.localStream.getTracks().forEach(t => t.stop());
-        STATE.localStream = null;
+    if (state.localStream) {
+        state.localStream.getTracks().forEach(t => t.stop());
+        state.localStream = null;
     }
     
-    // Remove all remote audio elements
-    for (const [id, audio] of STATE.audioElements) {
-        audio.remove();
-    }
-    STATE.audioElements.clear();
+    state.inCall = false;
+    state.muted = false;
     
-    STATE.isInCall = false;
-    STATE.isMuted = false;
-    broadcastCallState(false);
-    updateCallUI();
-    updateParticipantCount();
-    
+    // Update UI
     document.getElementById('callBtn').textContent = '📞 Start Call';
-    document.getElementById('callBtn').classList.remove('active');
+    document.getElementById('callBtn').classList.remove('btn-danger');
     document.getElementById('muteBtn').disabled = true;
     document.getElementById('muteBtn').textContent = '🔊 Mute';
     document.getElementById('muteBtn').classList.remove('muted');
+    document.getElementById('leaveBtn').disabled = true;
     document.getElementById('callIcon').textContent = '📞';
-    document.getElementById('callStatusText').textContent = 'Ready to call';
-    document.getElementById('callStatusText').classList.remove('active');
+    document.getElementById('callStatus').textContent = 'Ready';
+    document.getElementById('callStatus').classList.remove('active');
     
+    // Broadcast leave
+    sendSignal({
+        type: 'leave',
+        userId: state.user.id
+    });
+    sendSignal({
+        type: 'call-state',
+        userId: state.user.id,
+        inCall: false
+    });
+    
+    updateParticipantCount();
+    state.debug('📴 Call ended');
     showToast('Call ended');
 }
 
 function toggleMute() {
-    if (!STATE.localStream) return;
-    STATE.isMuted = !STATE.isMuted;
-    STATE.localStream.getAudioTracks().forEach(t => {
-        t.enabled = !STATE.isMuted;
+    if (!state.localStream) return;
+    state.muted = !state.muted;
+    state.localStream.getAudioTracks().forEach(t => {
+        t.enabled = !state.muted;
     });
     
     const btn = document.getElementById('muteBtn');
-    btn.textContent = STATE.isMuted ? '🔇 Muted' : '🔊 Mute';
-    btn.classList.toggle('muted', STATE.isMuted);
+    btn.textContent = state.muted ? '🔇 Muted' : '🔊 Mute';
+    btn.classList.toggle('muted', state.muted);
 }
 
-function updateCallUI() {
-    const callBtn = document.getElementById('callBtn');
-    const leaveBtn = document.querySelector('.btn-leave');
-    callBtn.textContent = STATE.isInCall ? '⏹️ End Call' : '📞 Start Call';
-    callBtn.classList.toggle('active', STATE.isInCall);
-    leaveBtn.disabled = !STATE.isInCall;
-    document.getElementById('muteBtn').disabled = !STATE.isInCall;
-}
-
-function broadcastCallState(inCall) {
-    sendSignal({
-        type: 'call-state',
-        userId: STATE.currentUser.id,
-        inCall: inCall
-    });
-}
-
-function handleCallState(data) {
-    if (data.userId === STATE.currentUser.id) return;
-    updateMemberStatus(data.userId, data.inCall ? 'online' : 'away');
-    
-    if (data.inCall && STATE.isInCall) {
-        connectToPeer(data.userId);
-    } else if (!data.inCall) {
-        // Peer left call
-        if (STATE.peerConnections.has(data.userId)) {
-            STATE.peerConnections.get(data.userId).close();
-            STATE.peerConnections.delete(data.userId);
-            updateParticipantCount();
-            // Remove audio element
-            if (STATE.audioElements.has(data.userId)) {
-                STATE.audioElements.get(data.userId).remove();
-                STATE.audioElements.delete(data.userId);
-            }
-        }
-    }
-}
-
-// ============================================================
-//# 🔗 PEER-TO-PEER CONNECTION
-// ============================================================
-
+// ----- PEER CONNECTION -----
 async function connectToPeer(peerId) {
-    if (peerId === STATE.currentUser.id) return;
-    if (STATE.peerConnections.has(peerId)) return;
-    if (!STATE.localStream) return;
+    if (peerId === state.user.id) return;
+    if (state.peers.has(peerId)) return;
+    if (!state.localStream) return;
     
-    console.log('🔗 Connecting to peer:', peerId);
+    const member = state.members.find(m => m.id === peerId);
+    state.debug(`🔗 Connecting to ${member?.name || peerId}...`);
     
-    const pc = new RTCPeerConnection(rtcConfig);
-    STATE.peerConnections.set(peerId, pc);
-    
-    // Add local stream
-    STATE.localStream.getTracks().forEach(track => {
-        pc.addTrack(track, STATE.localStream);
+    const pc = new RTCPeerConnection({
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+        ]
     });
     
-    // Handle incoming stream
+    // Add local tracks
+    state.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, state.localStream);
+    });
+    
+    // Handle remote stream
     pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
             const stream = event.streams[0];
-            const audioEl = document.createElement('audio');
-            audioEl.autoplay = true;
-            audioEl.srcObject = stream;
-            audioEl.style.display = 'none';
-            document.body.appendChild(audioEl);
-            STATE.audioElements.set(peerId, audioEl);
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.autoplay = true;
+            audio.style.display = 'none';
+            document.body.appendChild(audio);
             
-            // Find member name for debugging
-            const member = STATE.members.find(m => m.id === peerId);
-            console.log(`🔊 Audio from ${member?.name || peerId}`);
+            state.peers.set(peerId, { 
+                pc: pc, 
+                audio: audio,
+                name: member?.name || peerId
+            });
+            state.debug(`🔊 Audio from ${member?.name || peerId}`);
+            updateParticipantCount();
         }
     };
     
@@ -752,8 +676,8 @@ async function connectToPeer(peerId) {
     pc.onicecandidate = (event) => {
         if (event.candidate) {
             sendSignal({
-                type: 'ice-candidate',
-                from: STATE.currentUser.id,
+                type: 'ice',
+                from: state.user.id,
                 to: peerId,
                 candidate: event.candidate
             });
@@ -762,71 +686,91 @@ async function connectToPeer(peerId) {
     
     // Connection state
     pc.onconnectionstatechange = () => {
-        if (pc.connectionState === 'connected') {
-            console.log('✅ Connected to peer:', peerId);
-            updateParticipantCount();
-        } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-            console.log('❌ Disconnected from peer:', peerId);
-            STATE.peerConnections.delete(peerId);
-            updateParticipantCount();
+        const state = pc.connectionState;
+        if (state === 'connected') {
+            state.debug(`✅ Connected to ${member?.name || peerId}`);
+        } else if (state === 'disconnected' || state === 'failed') {
+            state.debug(`❌ Lost connection to ${member?.name || peerId}`);
+            disconnectPeer(peerId);
         }
     };
     
-    // Create offer
+    // Create and send offer
     try {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         sendSignal({
             type: 'offer',
-            from: STATE.currentUser.id,
+            from: state.user.id,
             to: peerId,
             sdp: pc.localDescription
         });
-    } catch (err) {
-        console.error('Offer error:', err);
+    } catch(err) {
+        state.debug('❌ Offer error: ' + err.message);
     }
 }
 
-// ============================================================
-//# 📨 SIGNAL HANDLERS
-// ============================================================
+function disconnectPeer(peerId) {
+    const peer = state.peers.get(peerId);
+    if (peer) {
+        try {
+            peer.pc.close();
+            if (peer.audio) peer.audio.remove();
+        } catch(e) {}
+        state.peers.delete(peerId);
+        state.debug(`🔌 Disconnected from ${peer.name || peerId}`);
+        updateParticipantCount();
+    }
+}
 
+// ----- OFFER/ANSWER HANDLERS -----
 async function handleOffer(data) {
-    if (data.to !== STATE.currentUser.id) return;
-    if (STATE.peerConnections.has(data.from)) return;
-    if (!STATE.localStream) {
-        // Auto-start call if not started
-        await startCall();
-        // Then retry
+    if (data.to !== state.user.id) return;
+    if (state.peers.has(data.from)) return;
+    if (!state.localStream) {
+        // Wait for stream
         setTimeout(() => handleOffer(data), 500);
         return;
     }
     
-    const pc = new RTCPeerConnection(rtcConfig);
-    STATE.peerConnections.set(data.from, pc);
+    const member = state.members.find(m => m.id === data.from);
+    state.debug(`📨 Offer from ${member?.name || data.from}`);
     
-    // Add local stream
-    STATE.localStream.getTracks().forEach(track => {
-        pc.addTrack(track, STATE.localStream);
+    const pc = new RTCPeerConnection({
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+    });
+    
+    state.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, state.localStream);
     });
     
     pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
             const stream = event.streams[0];
-            const audioEl = document.createElement('audio');
-            audioEl.autoplay = true;
-            audioEl.srcObject = stream;
-            audioEl.style.display = 'none';
-            document.body.appendChild(audioEl);
-            STATE.audioElements.set(data.from, audioEl);
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.autoplay = true;
+            audio.style.display = 'none';
+            document.body.appendChild(audio);
+            
+            state.peers.set(data.from, { 
+                pc: pc, 
+                audio: audio,
+                name: member?.name || data.from
+            });
+            state.debug(`🔊 Audio from ${member?.name || data.from}`);
+            updateParticipantCount();
         }
     };
     
     pc.onicecandidate = (event) => {
         if (event.candidate) {
             sendSignal({
-                type: 'ice-candidate',
-                from: STATE.currentUser.id,
+                type: 'ice',
+                from: state.user.id,
                 to: data.from,
                 candidate: event.candidate
             });
@@ -839,85 +783,63 @@ async function handleOffer(data) {
         await pc.setLocalDescription(answer);
         sendSignal({
             type: 'answer',
-            from: STATE.currentUser.id,
+            from: state.user.id,
             to: data.from,
             sdp: pc.localDescription
         });
-    } catch (err) {
-        console.error('Answer error:', err);
+    } catch(err) {
+        state.debug('❌ Answer error: ' + err.message);
     }
 }
 
 async function handleAnswer(data) {
-    if (data.to !== STATE.currentUser.id) return;
-    const pc = STATE.peerConnections.get(data.from);
-    if (!pc) return;
+    if (data.to !== state.user.id) return;
+    const peer = state.peers.get(data.from);
+    if (!peer) return;
     
     try {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        console.log('✅ Answer set for:', data.from);
-    } catch (err) {
-        console.error('Set answer error:', err);
+        await peer.pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        state.debug(`✅ Answer from ${data.from}`);
+    } catch(err) {
+        state.debug('❌ Set answer error: ' + err.message);
     }
 }
 
-async function handleIceCandidate(data) {
-    if (data.to !== STATE.currentUser.id) return;
-    const pc = STATE.peerConnections.get(data.from);
-    if (!pc) return;
+async function handleIce(data) {
+    if (data.to !== state.user.id) return;
+    const peer = state.peers.get(data.from);
+    if (!peer) return;
     
     try {
-        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-    } catch (err) {
-        console.error('ICE candidate error:', err);
+        await peer.pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    } catch(err) {
+        // Ignore ICE errors
     }
 }
 
-function handleUserLeft(data) {
-    if (data.userId === STATE.currentUser.id) return;
-    removeMember(data.userId);
-    if (STATE.peerConnections.has(data.userId)) {
-        STATE.peerConnections.get(data.userId).close();
-        STATE.peerConnections.delete(data.userId);
-        updateParticipantCount();
-    }
-    if (STATE.audioElements.has(data.userId)) {
-        STATE.audioElements.get(data.userId).remove();
-        STATE.audioElements.delete(data.userId);
-    }
-}
-
-// ============================================================
-//# 🛠️ UTILITY FUNCTIONS
-// ============================================================
-
-function showToast(message) {
+// ----- TOAST -----
+function showToast(msg) {
     let toast = document.querySelector('.toast');
     if (!toast) {
         toast = document.createElement('div');
         toast.className = 'toast';
         document.body.appendChild(toast);
     }
-    toast.textContent = message;
+    toast.textContent = msg;
     toast.style.display = 'block';
-    clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => {
-        toast.style.display = 'none';
-    }, 3000);
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.display = 'none'; }, 3000);
 }
 
-// ============================================================
-//# 🚀 INIT
-// ============================================================
+// ----- AUTO LOGIN (for quick testing) -----
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginName').value = 'User_' + Math.floor(Math.random() * 1000);
+    // Uncomment to auto-login:
+    // setTimeout(login, 500);
+});
 
-// Auto-login for demo (remove for production)
-// setTimeout(() => {
-//     if (STATE.currentUser) return;
-//     document.getElementById('loginName').value = 'User_' + Math.floor(Math.random() * 100);
-// }, 500);
-
-console.log('🎤 Group Voice Call App loaded!');
-console.log('📝 Enter a name and click "Join Call" to start');
+console.log('🎙️ Group Call App loaded!');
+console.log('📝 Enter a name and click "Join Room"');
 </script>
 </body>
 </html>
