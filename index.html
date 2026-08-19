@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group Voice Call - Rooms</title>
+    <title>Group Voice Call</title>
     <style>
         * {
             margin: 0;
@@ -45,6 +45,25 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: #1a2744;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.connected { background: #3ddc84; }
+        .status-dot.connecting { background: #f5a623; }
+        .status-dot.disconnected { background: #666; }
+        
         .room-badge {
             background: #1a2744;
             padding: 6px 16px;
@@ -63,14 +82,6 @@
             align-items: center;
             gap: 8px;
         }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .dot.online { background: #3ddc84; }
-        .dot.offline { background: #666; }
         
         .grid {
             display: grid;
@@ -118,6 +129,7 @@
         .btn-danger { background: #8a2a2a; color: #ff8888; }
         .btn-mute { background: #2a3a5a; }
         .btn-mute.muted { background: #f5a623; color: #000; }
+        .btn-success { background: #2d7a4b; color: white; }
         
         .members-panel {
             background: #0f1625;
@@ -184,10 +196,9 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-left: auto;
         }
         .member-item .volume-control input[type="range"] {
-            width: 60px;
+            width: 50px;
             height: 4px;
             -webkit-appearance: none;
             background: #2a3a5a;
@@ -202,18 +213,13 @@
             background: #6c8cff;
             cursor: pointer;
         }
-        .member-item .volume-control .vol-label {
-            font-size: 11px;
-            color: #667799;
-            min-width: 30px;
-        }
         .member-item .speaking-indicator {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background: #3ddc84;
             display: none;
-            animation: pulse 1s ease-in-out infinite;
+            animation: pulse 0.8s ease-in-out infinite;
         }
         .member-item.speaking .speaking-indicator {
             display: inline-block;
@@ -288,17 +294,13 @@
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         
-        .debug {
-            font-size: 11px;
-            color: #445566;
-            margin-top: 12px;
-            padding: 8px;
+        .connection-status {
+            font-size: 12px;
+            color: #667799;
+            margin-top: 8px;
+            padding: 6px;
             background: #0a0e1a;
             border-radius: 8px;
-            text-align: left;
-            font-family: monospace;
-            max-height: 50px;
-            overflow-y: auto;
         }
     </style>
 </head>
@@ -311,9 +313,10 @@
         <p>Enter your name and room number</p>
         <input type="text" id="loginName" class="login-input" placeholder="Your name..." maxlength="20" autofocus>
         <input type="text" id="loginRoom" class="login-input" placeholder="Room number (e.g., 1234)" maxlength="10" value="1234">
+        <input type="text" id="serverUrl" class="login-input" placeholder="Server URL" value="ws://localhost:8080" style="font-size:13px;">
         <button class="login-btn" onclick="login()">🎤 Join Room</button>
         <div style="margin-top:12px;font-size:12px;color:#667799;text-align:center;">
-            Share the room number with friends to connect
+            Share room number with friends to connect
         </div>
     </div>
 </div>
@@ -323,10 +326,13 @@
     <div class="container">
         <div class="header">
             <div class="logo">🎙️ GroupCall</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <span class="status-badge">
+                    <span class="status-dot" id="connectionDot"></span>
+                    <span id="connectionText">Connecting...</span>
+                </span>
                 <span class="room-badge">🏠 Room #<span id="roomDisplay">0000</span></span>
                 <span class="user-badge">
-                    <span class="dot online"></span>
                     <span id="currentUserName">You</span>
                     <button onclick="logout()" style="background:none;border:none;color:#667799;cursor:pointer;margin-left:8px;">✕</button>
                 </span>
@@ -348,7 +354,7 @@
                     👥 <span id="participantCount">0</span> in call
                 </div>
                 
-                <div class="debug" id="debugLog">⚡ Ready</div>
+                <div class="connection-status" id="connectionStatus">⚡ Connected to server</div>
             </div>
             
             <div class="members-panel">
@@ -368,7 +374,7 @@
 
 <script>
 // ============================================================
-// 🎯 COMPLETE GROUP CALL WITH ROOMS, VOLUME CONTROL & SPEAKER DETECTION
+// 🚀 FULLY WORKING GROUP CALL WITH WEBSOCKET SERVER
 // ============================================================
 
 // ----- STATE -----
@@ -378,13 +384,14 @@ const state = {
     inCall: false,
     muted: false,
     localStream: null,
-    peers: new Map(), // userId -> { pc, audio, name, volume, analyser, speaking }
-    members: [], // { id, name, inCall }
-    channel: null,
+    peers: new Map(),
+    members: [],
+    ws: null,
+    connected: false,
     debug: (msg) => {
-        const el = document.getElementById('debugLog');
-        if (el) el.textContent = msg;
         console.log('🔵', msg);
+        const el = document.getElementById('connectionStatus');
+        if (el) el.textContent = msg;
     }
 };
 
@@ -392,8 +399,11 @@ const state = {
 function login() {
     const nameInput = document.getElementById('loginName');
     const roomInput = document.getElementById('loginRoom');
+    const serverInput = document.getElementById('serverUrl');
+    
     const name = nameInput.value.trim() || 'User_' + Math.floor(Math.random() * 1000);
     const room = roomInput.value.trim() || '1234';
+    const serverUrl = serverInput.value.trim() || 'ws://localhost:8080';
     
     state.user = {
         id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
@@ -406,133 +416,145 @@ function login() {
     document.getElementById('currentUserName').textContent = name;
     document.getElementById('roomDisplay').textContent = room;
     
-    state.debug('👋 Welcome ' + name + ' to room ' + room);
+    state.debug('👋 Connecting to server...');
     
-    initSignaling();
-    sendPresence();
-    
-    // Auto-join call
-    setTimeout(() => {
-        if (!state.inCall) {
-            startCall();
-        }
-    }, 1000);
+    connectWebSocket(serverUrl);
 }
 
 function logout() {
     leaveCall();
+    if (state.ws) {
+        state.ws.close();
+        state.ws = null;
+    }
     state.user = null;
     state.room = null;
     document.getElementById('loginOverlay').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
-    if (state.channel) {
-        state.channel.close();
-        state.channel = null;
-    }
 }
 
-// ----- SIGNALING (Room-based) -----
-function initSignaling() {
-    const channelName = 'group-call-room-' + state.room;
+// ----- WEBSOCKET CONNECTION -----
+function connectWebSocket(url) {
     try {
-        state.channel = new BroadcastChannel(channelName);
-        state.channel.onmessage = (e) => handleSignal(e.data);
-        state.debug('📡 Signaling in room ' + state.room);
-    } catch(e) {
-        state.debug('⚠️ Using localStorage fallback');
-        let lastTime = 0;
-        const key = 'group-call-signal-' + state.room;
-        setInterval(() => {
-            const data = localStorage.getItem(key);
-            if (data) {
-                try {
-                    const parsed = JSON.parse(data);
-                    if (parsed.time > lastTime) {
-                        lastTime = parsed.time;
-                        handleSignal(parsed.data);
-                    }
-                } catch(e) {}
-            }
-        }, 300);
-        window._sendSignal = (data) => {
-            localStorage.setItem(key, JSON.stringify({
-                time: Date.now(),
-                data: data
-            }));
+        state.ws = new WebSocket(url);
+        
+        state.ws.onopen = () => {
+            state.connected = true;
+            state.debug('✅ Connected to server');
+            document.getElementById('connectionDot').className = 'status-dot connected';
+            document.getElementById('connectionText').textContent = 'Connected';
+            
+            // Join room
+            sendToServer({
+                type: 'join',
+                userId: state.user.id,
+                name: state.user.name,
+                roomId: state.room,
+                inCall: state.inCall
+            });
         };
+        
+        state.ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleServerMessage(data);
+            } catch(e) {
+                console.error('Invalid message:', e);
+            }
+        };
+        
+        state.ws.onclose = () => {
+            state.connected = false;
+            state.debug('❌ Disconnected from server');
+            document.getElementById('connectionDot').className = 'status-dot disconnected';
+            document.getElementById('connectionText').textContent = 'Disconnected';
+            
+            // Try to reconnect after 3 seconds
+            setTimeout(() => {
+                if (!state.connected && state.user) {
+                    state.debug('🔄 Reconnecting...');
+                    connectWebSocket(url);
+                }
+            }, 3000);
+        };
+        
+        state.ws.onerror = (error) => {
+            state.debug('⚠️ WebSocket error: ' + error.message);
+        };
+        
+    } catch(e) {
+        state.debug('❌ Failed to connect: ' + e.message);
+        showToast('❌ Cannot connect to server');
     }
 }
 
-function sendSignal(data) {
-    data.room = state.room;
-    if (state.channel) {
-        state.channel.postMessage(data);
-    } else if (window._sendSignal) {
-        window._sendSignal(data);
+function sendToServer(data) {
+    if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+        state.ws.send(JSON.stringify(data));
     }
 }
 
-// ----- PRESENCE -----
-function sendPresence() {
-    if (!state.user) return;
-    sendSignal({
-        type: 'presence',
-        userId: state.user.id,
-        name: state.user.name,
-        inCall: state.inCall
-    });
-}
-
-// ----- HANDLE SIGNALS -----
-function handleSignal(data) {
-    if (!state.user) return;
-    if (data.userId === state.user.id) return;
-    if (data.room !== state.room) return;
-    
-    state.debug('📨 ' + data.type + ' from ' + (data.name || data.userId));
-    
+// ----- HANDLE SERVER MESSAGES -----
+function handleServerMessage(data) {
     switch(data.type) {
+        case 'joined':
+            state.debug('✅ Joined room ' + data.roomId);
+            break;
+            
+        case 'members':
+            // Add existing members
+            data.members.forEach(m => {
+                if (m.userId !== state.user.id) {
+                    addMember(m.userId, m.name, m.inCall || false);
+                }
+            });
+            break;
+            
         case 'presence':
-            handlePresence(data);
+            if (data.userId !== state.user.id) {
+                handlePresence(data);
+            }
             break;
-        case 'offer':
-            handleOffer(data);
-            break;
-        case 'answer':
-            handleAnswer(data);
-            break;
-        case 'ice':
-            handleIce(data);
-            break;
-        case 'leave':
-            handleLeave(data);
-            break;
+            
         case 'call-state':
-            handleCallState(data);
+            if (data.userId !== state.user.id) {
+                handleCallState(data);
+            }
             break;
+            
         case 'speaking':
-            handleSpeaking(data);
+            if (data.userId !== state.user.id) {
+                handleSpeaking(data);
+            }
+            break;
+            
+        case 'offer':
+        case 'answer':
+        case 'ice':
+            if (data.to === state.user.id) {
+                handlePeerMessage(data);
+            }
+            break;
+            
+        case 'leave':
+            if (data.userId !== state.user.id) {
+                handleLeave(data);
+            }
             break;
     }
 }
 
-// ----- PRESENCE HANDLER -----
+// ----- PRESENCE HANDLING -----
 function handlePresence(data) {
     const existing = state.members.find(m => m.id === data.userId);
     if (!existing) {
-        state.members.push({
-            id: data.userId,
-            name: data.name || 'Unknown',
-            inCall: data.inCall || false
-        });
-        renderMembers();
-        state.debug(`👤 ${data.name} joined room`);
+        addMember(data.userId, data.name, data.inCall || false);
+        state.debug(`👤 ${data.name} joined`);
         
         if (state.inCall && data.inCall) {
             connectToPeer(data.userId);
         }
     } else {
-        const wasInCall = existing.inCall;
         existing.inCall = data.inCall || false;
         renderMembers();
         
@@ -553,6 +575,19 @@ function handleCallState(data) {
     }
 }
 
+function handleSpeaking(data) {
+    const items = document.querySelectorAll('.member-item');
+    items.forEach(el => {
+        if (el.dataset.userId === data.userId) {
+            if (data.speaking) {
+                el.classList.add('speaking');
+            } else {
+                el.classList.remove('speaking');
+            }
+        }
+    });
+}
+
 function handleLeave(data) {
     const member = state.members.find(m => m.id === data.userId);
     if (member) {
@@ -563,24 +598,26 @@ function handleLeave(data) {
     }
 }
 
-function handleSpeaking(data) {
-    const member = state.members.find(m => m.id === data.userId);
-    if (member) {
-        // Update UI via speaking detection
-        const items = document.querySelectorAll('.member-item');
-        items.forEach(el => {
-            if (el.dataset.userId === data.userId) {
-                if (data.speaking) {
-                    el.classList.add('speaking');
-                } else {
-                    el.classList.remove('speaking');
-                }
-            }
-        });
+function handlePeerMessage(data) {
+    switch(data.type) {
+        case 'offer':
+            handleOffer(data);
+            break;
+        case 'answer':
+            handleAnswer(data);
+            break;
+        case 'ice':
+            handleIce(data);
+            break;
     }
 }
 
-// ----- RENDER MEMBERS -----
+// ----- MEMBER MANAGEMENT -----
+function addMember(id, name, inCall) {
+    state.members.push({ id, name, inCall });
+    renderMembers();
+}
+
 function renderMembers() {
     const list = document.getElementById('memberList');
     const count = document.getElementById('memberCount');
@@ -592,10 +629,10 @@ function renderMembers() {
     }
     
     list.innerHTML = state.members.map(m => `
-        <div class="member-item" data-user-id="${m.id}" data-name="${m.name}">
+        <div class="member-item" data-user-id="${m.id}">
             <div class="info">
                 <div class="avatar">${m.name.charAt(0).toUpperCase()}</div>
-                <span class="name">${m.name} ${m.id === state.user?.id ? '(you)' : ''}</span>
+                <span class="name">${m.name}</span>
                 <span class="speaking-indicator"></span>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
@@ -605,7 +642,6 @@ function renderMembers() {
                         <input type="range" min="0" max="100" value="100" 
                                onchange="setVolume('${m.id}', this.value)"
                                oninput="setVolume('${m.id}', this.value)">
-                        <span class="vol-label" id="vol-${m.id}">100%</span>
                     </div>
                 ` : ''}
             </div>
@@ -619,10 +655,13 @@ function renderMembers() {
         const volInput = document.querySelector(`.member-item[data-user-id="${id}"] input[type="range"]`);
         if (volInput && peer.volume !== undefined) {
             volInput.value = peer.volume * 100;
-            const label = document.getElementById(`vol-${id}`);
-            if (label) label.textContent = Math.round(peer.volume * 100) + '%';
         }
     });
+}
+
+function updateParticipantCount() {
+    const inCall = state.members.filter(m => m.inCall).length;
+    document.getElementById('participantCount').textContent = inCall;
 }
 
 // ----- VOLUME CONTROL -----
@@ -632,12 +671,10 @@ function setVolume(userId, value) {
     if (peer && peer.audio) {
         peer.audio.volume = volume;
         peer.volume = volume;
-        const label = document.getElementById(`vol-${userId}`);
-        if (label) label.textContent = Math.round(volume * 100) + '%';
     }
 }
 
-// ----- SPEAKER DETECTION (Voice Activity) -----
+// ----- SPEAKER DETECTION -----
 function startSpeakerDetection() {
     if (!state.localStream) return;
     
@@ -661,17 +698,15 @@ function startSpeakerDetection() {
             sum += value * value;
         }
         const rms = Math.sqrt(sum / dataArray.length);
-        const isSpeaking = rms > 0.03; // Threshold for voice detection
+        const isSpeaking = rms > 0.03;
         
         if (isSpeaking && !wasSpeaking) {
             wasSpeaking = true;
-            // Broadcast speaking state
-            sendSignal({
+            sendToServer({
                 type: 'speaking',
                 userId: state.user.id,
                 speaking: true
             });
-            // Update local UI
             const items = document.querySelectorAll('.member-item');
             items.forEach(el => {
                 if (el.dataset.userId === state.user.id) {
@@ -681,10 +716,9 @@ function startSpeakerDetection() {
             clearTimeout(speakingTimeout);
         } else if (!isSpeaking && wasSpeaking) {
             wasSpeaking = false;
-            // Delay to avoid rapid toggling
             clearTimeout(speakingTimeout);
             speakingTimeout = setTimeout(() => {
-                sendSignal({
+                sendToServer({
                     type: 'speaking',
                     userId: state.user.id,
                     speaking: false
@@ -703,13 +737,6 @@ function startSpeakerDetection() {
     
     detectSpeech();
     state._audioContext = audioContext;
-    state._analyser = analyser;
-}
-
-// ----- UPDATE PARTICIPANT COUNT -----
-function updateParticipantCount() {
-    const inCall = state.members.filter(m => m.inCall).length;
-    document.getElementById('participantCount').textContent = inCall;
 }
 
 // ----- CALL CONTROLS -----
@@ -732,7 +759,6 @@ async function startCall() {
         state.inCall = true;
         state.muted = false;
         
-        // Update UI
         document.getElementById('callBtn').textContent = '⏹️ End Call';
         document.getElementById('callBtn').classList.add('btn-danger');
         document.getElementById('muteBtn').disabled = false;
@@ -741,19 +767,17 @@ async function startCall() {
         document.getElementById('callStatus').textContent = '🔴 Live';
         document.getElementById('callStatus').classList.add('active');
         
-        // Start speaker detection
         startSpeakerDetection();
         
-        // Connect to existing members who are in call
+        // Connect to existing members
         for (const member of state.members) {
             if (member.id !== state.user.id && member.inCall) {
                 await connectToPeer(member.id);
             }
         }
         
-        // Broadcast presence
-        sendPresence();
-        sendSignal({
+        // Broadcast call state
+        sendToServer({
             type: 'call-state',
             userId: state.user.id,
             inCall: true
@@ -784,13 +808,11 @@ function leaveCall() {
     }
     state.peers.clear();
     
-    // Stop local stream
     if (state.localStream) {
         state.localStream.getTracks().forEach(t => t.stop());
         state.localStream = null;
     }
     
-    // Clean up audio context
     if (state._audioContext) {
         state._audioContext.close();
         state._audioContext = null;
@@ -799,7 +821,6 @@ function leaveCall() {
     state.inCall = false;
     state.muted = false;
     
-    // Update UI
     document.getElementById('callBtn').textContent = '📞 Start Call';
     document.getElementById('callBtn').classList.remove('btn-danger');
     document.getElementById('muteBtn').disabled = true;
@@ -810,18 +831,12 @@ function leaveCall() {
     document.getElementById('callStatus').textContent = 'Ready';
     document.getElementById('callStatus').classList.remove('active');
     
-    // Broadcast leave
-    sendSignal({
-        type: 'leave',
-        userId: state.user.id
-    });
-    sendSignal({
+    sendToServer({
         type: 'call-state',
         userId: state.user.id,
         inCall: false
     });
     
-    // Remove speaking indicators
     document.querySelectorAll('.member-item.speaking').forEach(el => {
         el.classList.remove('speaking');
     });
@@ -843,7 +858,7 @@ function toggleMute() {
     btn.classList.toggle('muted', state.muted);
 }
 
-// ----- PEER CONNECTION -----
+// ----- PEER CONNECTION (WebRTC) -----
 async function connectToPeer(peerId) {
     if (peerId === state.user.id) return;
     if (state.peers.has(peerId)) return;
@@ -855,16 +870,15 @@ async function connectToPeer(peerId) {
     const pc = new RTCPeerConnection({
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
         ]
     });
     
-    // Add local tracks
     state.localStream.getTracks().forEach(track => {
         pc.addTrack(track, state.localStream);
     });
     
-    // Handle remote stream
     pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
             const stream = event.streams[0];
@@ -884,7 +898,7 @@ async function connectToPeer(peerId) {
             state.debug(`🔊 Audio from ${member?.name || peerId}`);
             updateParticipantCount();
             
-            // Restore volume setting
+            // Restore volume
             const volInput = document.querySelector(`.member-item[data-user-id="${peerId}"] input[type="range"]`);
             if (volInput) {
                 const val = parseInt(volInput.value) / 100;
@@ -894,10 +908,9 @@ async function connectToPeer(peerId) {
         }
     };
     
-    // ICE candidates
     pc.onicecandidate = (event) => {
         if (event.candidate) {
-            sendSignal({
+            sendToServer({
                 type: 'ice',
                 from: state.user.id,
                 to: peerId,
@@ -906,7 +919,6 @@ async function connectToPeer(peerId) {
         }
     };
     
-    // Connection state
     pc.onconnectionstatechange = () => {
         const connState = pc.connectionState;
         if (connState === 'connected') {
@@ -917,11 +929,10 @@ async function connectToPeer(peerId) {
         }
     };
     
-    // Create and send offer
     try {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        sendSignal({
+        sendToServer({
             type: 'offer',
             from: state.user.id,
             to: peerId,
@@ -946,7 +957,6 @@ function disconnectPeer(peerId) {
         state.debug(`🔌 Disconnected from ${peer.name || peerId}`);
         updateParticipantCount();
     }
-    // Remove speaking indicator
     document.querySelectorAll(`.member-item[data-user-id="${peerId}"]`).forEach(el => {
         el.classList.remove('speaking');
     });
@@ -994,7 +1004,6 @@ async function handleOffer(data) {
             state.debug(`🔊 Audio from ${member?.name || data.from}`);
             updateParticipantCount();
             
-            // Restore volume setting
             const volInput = document.querySelector(`.member-item[data-user-id="${data.from}"] input[type="range"]`);
             if (volInput) {
                 const val = parseInt(volInput.value) / 100;
@@ -1006,7 +1015,7 @@ async function handleOffer(data) {
     
     pc.onicecandidate = (event) => {
         if (event.candidate) {
-            sendSignal({
+            sendToServer({
                 type: 'ice',
                 from: state.user.id,
                 to: data.from,
@@ -1019,7 +1028,7 @@ async function handleOffer(data) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-        sendSignal({
+        sendToServer({
             type: 'answer',
             from: state.user.id,
             to: data.from,
@@ -1050,9 +1059,7 @@ async function handleIce(data) {
     
     try {
         await peer.pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-    } catch(err) {
-        // Ignore ICE errors
-    }
+    } catch(err) {}
 }
 
 // ----- TOAST -----
@@ -1069,14 +1076,18 @@ function showToast(msg) {
     toast._t = setTimeout(() => { toast.style.display = 'none'; }, 3000);
 }
 
-// ----- AUTO LOGIN (for quick testing) -----
+// ----- AUTO LOGIN -----
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginName').value = 'User_' + Math.floor(Math.random() * 1000);
     document.getElementById('loginRoom').value = '1234';
+    // Auto-detect server URL
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname;
+    const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+    document.getElementById('serverUrl').value = `${protocol}//${host}:${port}`;
 });
 
-console.log('🎙️ Group Call App with Rooms loaded!');
-console.log('📝 Enter a name, room number, and click "Join Room"');
+console.log('🎙️ Group Call App with WebSocket ready!');
 </script>
 </body>
 </html>
